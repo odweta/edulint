@@ -23,7 +23,7 @@ from edulint.config.language_translations import (
     parse_lang_file,
 )
 from edulint.config.utils import print_invalid_type_message, config_file_val_to_str, add_enabled
-from typing import Dict, List, Optional, Tuple, Iterator, Any
+from typing import Dict, List, Optional, Tuple, Iterator, Any, Iterable
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -233,25 +233,29 @@ class ImmutableConfig:
 # %% components
 
 
-def extract_args(path: str) -> List[str]:
+def extract_args_from_lines(lines: Iterable[str]) -> List[str]:
     edulint_re = re.compile(r"\s*#[\s#]*edulint:\s*", re.IGNORECASE)
     ib111_re = re.compile(r".*from\s+ib111\s+import.+week_(\d+)", re.IGNORECASE)
 
     result: List[str] = []
-    with open(path, encoding="utf-8") as f:
-        for i, line in enumerate(f):
-            line = line.strip()
+    for line in lines:
+        line = line.strip()
 
-            edmatch = edulint_re.match(line)
-            if edmatch:
-                raw_args = line[edmatch.end() :]
-                result.extend(shlex.split(raw_args))
+        edmatch = edulint_re.match(line)
+        if edmatch:
+            raw_args = line[edmatch.end() :]
+            result.extend(shlex.split(raw_args))
 
-            ibmatch = ib111_re.match(line)
-            if ibmatch:
-                result.append(f"{Option.CONFIG_FILE.to_name()}=ib111.toml")
+        ibmatch = ib111_re.match(line)
+        if ibmatch:
+            result.append(f"{Option.CONFIG_FILE.to_name()}=ib111.toml")
 
     return result
+
+
+def extract_args(path: str) -> List[str]:
+    with open(path, encoding="utf-8") as f:
+        return extract_args_from_lines(f)
 
 
 def parse_option(

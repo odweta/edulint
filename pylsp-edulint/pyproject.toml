@@ -1,0 +1,21 @@
+[project]
+name = "pylsp-edulint"
+version = "0.1.0"
+description = "EduLint diagnostics for python-lsp-server (fast Ruff tier + warm EduLint worker)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPL-3.0-only" }
+dependencies = ["python-lsp-server", "edulint", "ruff"]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-mock"]
+
+[build-system]
+requires = ["setuptools>=62.6"]
+build-backend = "setuptools.build_meta"
+
+[project.entry-points.pylsp]
+pylsp_edulint = "pylsp_edulint.plugin"
+
+[tool.setuptools]
+packages = ["pylsp_edulint"]
