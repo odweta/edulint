@@ -49,6 +49,8 @@ A fast diagnostics source for editors using [python-lsp-server](https://github.c
 Integrate into your `init.lua` like this:
 
 ```lua
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
 -- python lsp
 vim.lsp.config("pylsp", {
   cmd = { "pylsp" },
