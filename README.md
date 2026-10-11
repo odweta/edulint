@@ -42,6 +42,10 @@ python3 -m edulint check some_file.py  # Usage example
 docker run -v ${PWD}:/app edulint/edulint-cli check some_file.py
 ```
 
+### Neovim / editors (pylsp plugin)
+
+A fast diagnostics source for editors using [python-lsp-server](https://github.com/python-lsp/python-lsp-server) lives in [`pylsp-edulint/`](pylsp-edulint/README.md). It runs Ruff for instant diagnostics and a persistent warm EduLint worker for the checks Ruff cannot reproduce. See its README for installation, Neovim `init.lua` configuration and benchmarks.
+
 ## Road map (long-term)
 
 - [x] Additional explanations for problems detected in code
