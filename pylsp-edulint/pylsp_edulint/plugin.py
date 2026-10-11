@@ -222,22 +222,23 @@ def pylsp_lint(config: Any, workspace: Any, document: Any, is_saved: bool) -> Li
     if not settings["live_mode"] and not is_saved:
         return _diagnostics(state)
 
-    from edulint.fast.ruff_backend import RuffError, RuffNotFoundError
-
     if settings["mode"] == "full":
         from edulint.fast.worker import WorkerError
 
-        worker = _STATE.get_worker(settings["timeout"])
         try:
+            worker = _STATE.get_worker(settings["timeout"])
             problems = worker.lint(document.path, text, settings["options"], timeout=settings["timeout"])
         except WorkerError as e:
             log.error("EduLint worker failed: %s", e)
             return [_error_diagnostic(f"EduLint worker failed: {e}")]
+        except Exception as e:  # pluggy would swallow it and the editor would show nothing
+            log.exception("EduLint failed")
+            return [_error_diagnostic(f"EduLint failed: {type(e).__name__}: {e}")]
         state.fast_problems, state.fast_tool, state.text = problems, "worker", text
         state.slow_problems = []
         return _diagnostics(state)
 
-    from edulint.fast.ruff_backend import lint_buffer
+    from edulint.fast.ruff_backend import RuffError, RuffNotFoundError, lint_buffer
 
     try:
         problems = lint_buffer(
@@ -256,6 +257,9 @@ def pylsp_lint(config: Any, workspace: Any, document: Any, is_saved: bool) -> Li
     except RuffError as e:
         log.error("Ruff failed: %s", e)
         return [_error_diagnostic(f"EduLint: {e}")]
+    except Exception as e:
+        log.exception("EduLint failed")
+        return [_error_diagnostic(f"EduLint failed: {type(e).__name__}: {e}")]
     state.fast_problems, state.fast_tool, state.text = problems, "ruff", text
 
     if settings["mode"] == "hybrid" and (
