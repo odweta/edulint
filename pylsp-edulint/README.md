@@ -55,7 +55,7 @@ vim.lsp.config("pylsp", {
 vim.lsp.enable("pylsp")
 ```
 
-Verify with `:LspInfo` (pylsp attached) and `:LspLog` (look for `pylsp_edulint`); diagnostics have source `edulint/ruff` or `edulint/pylint`/`edulint/flake8`.
+Verify that pylsp is attached with `:checkhealth vim.lsp` (or `:lua =vim.lsp.get_clients({ bufnr = 0 })`), and read the log with `:lua vim.cmd.edit(vim.lsp.log.get_filename())` (look for `pylsp_edulint`). `:LspInfo`/`:LspLog` exist only if you install [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig); Neovim itself has no such commands (newer versions have `:lsp`, e.g. `:lsp restart`). Diagnostics have source `edulint/ruff`, or `edulint/worker` for the full tier.
 
 ## Settings
 
