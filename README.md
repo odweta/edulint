@@ -46,12 +46,57 @@ docker run -v ${PWD}:/app edulint/edulint-cli check some_file.py
 
 A fast diagnostics source for editors using [python-lsp-server](https://github.com/python-lsp/python-lsp-server) lives in [`pylsp-edulint/`](pylsp-edulint/README.md). It runs Ruff for instant diagnostics and a persistent warm EduLint worker for the checks Ruff cannot reproduce. See its README for installation, Neovim `init.lua` configuration and benchmarks.
 
+Integrate into your `init.lua` like this:
+
+```lua
+-- python lsp
+vim.lsp.config("pylsp", {
+  cmd = { "pylsp" },
+  capabilities = capabilities,
+  settings = {
+    pylsp = {
+      plugins = {
+        ...
+        pylsp_edulint = {
+          enabled = true,
+          live_mode = true,
+          mode = "hybrid",       -- "fast" | "hybrid" | "full"
+          full_check = "save",   -- "save" | "live" | "off"
+          options = { "config-file=cs1" }, -- like `edulint check -o`
+        },
+        -- avoid duplicate diagnostics
+        pyflakes = { enabled = false },
+        pycodestyle = { enabled = false },
+        mccabe = { enabled = false },
+        pylint = { enabled = false },
+        flake8 = { enabled = false },
+      },
+    },
+  },
+})
+
+vim.lsp.enable("pylsp")
+```
+
+There is a bug I encountered where trailing whitespace would not get reported inline. The snippet below fixes this by removing trailing whitespace on every save of a file:
+
+```lua
+-- remove trailing whitespace at the end of lines
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    vim.cmd([[%s/\s\+$//e]])
+  end,
+})
+```
+
 ## Road map (long-term)
 
 - [x] Additional explanations for problems detected in code
 - [x] [Thonny plugin](https://github.com/GiraffeReversed/thonny-edulint)
 - [x] More code quality defects (from WPS; detecting duplicate code)
 - [x] Rewrite web to [React](https://github.com/GiraffeReversed/edulint-react-web)
+- [x] Add a pylsp plugin for Neovim using Ruff
 - [ ] Add additional functionality to web (more settings, better teacher onboarding, …)
 - [ ] Speed-up linting by switching to [Ruff](https://github.com/charliermarsh/ruff)
 - [ ] official VS Code plugin (3rd party plugin already exists: [Github](https://github.com/matousekm/edulint-vscode), [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=matousekm.edulint-vscode))
